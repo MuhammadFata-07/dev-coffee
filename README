@@ -1,0 +1,406 @@
+# DevOrder - Dev Coffee & Drinks
+
+Aplikasi e-commerce pemesanan minuman berbasis web untuk **Dev Coffee & Drinks** (UMKM kedai kopi).
+Proyek besar mata kuliah E-Commerce, dikerjakan oleh tim 4 orang.
+
+**Teknologi:** Laravel, MySQL, Blade + Bootstrap 5 (lewat CDN), Git/GitHub.
+
+---
+
+## Daftar Isi
+
+1. [Status fitur](#1-status-fitur)
+2. [Yang harus dipasang dulu](#2-yang-harus-dipasang-dulu)
+3. [Setup pertama kali di laptop](#3-setup-pertama-kali-di-laptop)
+4. [Akun demo](#4-akun-demo)
+5. [Alur kerja harian tim](#5-alur-kerja-harian-tim)
+6. [Mengambil update dari teman](#6-mengambil-update-dari-teman)
+7. [Aturan penting tim](#7-aturan-penting-tim)
+8. [Menangani konflik](#8-menangani-konflik)
+9. [Masalah yang sering muncul](#9-masalah-yang-sering-muncul)
+10. [Struktur folder penting](#10-struktur-folder-penting)
+
+---
+
+## 1. Status fitur
+
+- [x] FR-01 Registrasi, login, logout
+- [x] FR-02 Manajemen pengguna (admin)
+- [x] FR-03 Pembagian hak akses (admin, kasir, pelanggan)
+- [x] FR-04 Manajemen kategori
+- [ ] FR-05 CRUD produk + foto
+- [ ] FR-06 Katalog dan detail produk
+- [ ] FR-07 Manajemen harga dan stok
+- [ ] FR-08 Keranjang + add-on
+- [ ] FR-09 Checkout
+- [ ] FR-10 Pembayaran manual dan verifikasi
+- [ ] FR-11 Status dan riwayat pesanan
+- [ ] FR-12 Input pesanan walk-in (kasir)
+- [ ] FR-13 Struk dan laporan penjualan
+
+Centang `[x]` setiap kali fitur selesai dan sudah di-merge ke `main`.
+
+---
+
+## 2. Yang harus dipasang dulu
+
+Cukup pasang **Laragon (versi Full)** karena sudah termasuk PHP, Apache, MySQL, Composer, dan Git.
+
+| Kebutuhan | Keterangan |
+|---|---|
+| Laragon Full | https://laragon.org/download |
+| Git | Sudah ada di Laragon. Kalau belum, pasang dari https://git-scm.com |
+| Akun GitHub | Sudah menerima undangan sebagai collaborator repo ini |
+| Editor | VS Code (disarankan) |
+
+Cek di terminal Laragon (klik kanan Laragon, lalu **Terminal**):
+
+```bash
+php -v
+composer -V
+git --version
+```
+
+Semuanya harus menampilkan nomor versi. PHP minimal **8.2**.
+
+Atur identitas Git sekali saja (pakai email yang sama dengan akun GitHub):
+
+```bash
+git config --global user.name "Nama Kamu"
+git config --global user.email "emailgithubkamu@contoh.com"
+```
+
+---
+
+## 3. Setup pertama kali di laptop
+
+> **Penting dipahami:** database **tidak ikut** tersimpan di GitHub. Setiap anggota punya database
+> sendiri di MySQL laptopnya masing-masing. Strukturnya (tabel) dan data awalnya (menu, akun demo)
+> dibuat otomatis lewat perintah `php artisan migrate --seed`. Jadi tidak perlu minta file database
+> ke siapa pun.
+
+### Langkah 1: Terima undangan repo
+
+Pemilik repo menambahkan kamu di **Settings, lalu Collaborators**. Buka email atau notifikasi GitHub, lalu
+klik **Accept invitation**. Tanpa ini, kamu tidak bisa clone repo (repo ini private).
+
+### Langkah 2: Nyalakan Laragon
+
+Buka Laragon, klik **Start All**. Pastikan Apache dan MySQL berstatus berjalan.
+
+### Langkah 3: Clone project
+
+Buka terminal Laragon, lalu masuk ke folder tempat menyimpan project:
+
+```bash
+cd C:\laragon\www\project\laravel
+git clone https://github.com/MuhammadFata-07/dev-coffee.git
+cd dev-coffee
+code .
+```
+
+Kalau folder `project\laravel` belum ada, buat dulu atau pakai folder lain (misalnya `C:\laragon\www`).
+`code .` membuka project di VS Code.
+
+Saat clone pertama kali, jendela login GitHub bisa muncul. Pilih **Sign in with your browser**
+(atau pilih `manager-core` kalau muncul daftar pilihan, centang *Always use this*), lalu login dan klik **Authorize**.
+
+### Langkah 4: Pasang library PHP
+
+```bash
+composer install
+```
+
+Tunggu sampai selesai (folder `vendor` akan terbentuk).
+
+### Langkah 5: Buat file .env
+
+File `.env` berisi pengaturan lokal dan **tidak ada di GitHub**. Salin dari contohnya:
+
+```bash
+copy .env.example .env
+php artisan key:generate
+```
+
+(Kalau memakai terminal Laragon, `cp .env.example .env` juga bisa.)
+
+### Langkah 6: Buat database kosong
+
+Pilih salah satu cara.
+
+**Cara A: lewat terminal Laragon**
+
+```bash
+mysql -u root -e "CREATE DATABASE dev_coffee CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+**Cara B: lewat HeidiSQL (bawaan Laragon)**
+
+1. Di Laragon, klik tombol **Database**. HeidiSQL terbuka dan konek ke MySQL.
+2. Klik kanan di daftar sebelah kiri, pilih **Create new**, lalu **Database**.
+3. Nama: `dev_coffee`. Collation: `utf8mb4_unicode_ci`. Klik **OK**.
+
+### Langkah 7: Atur .env
+
+Buka file `.env` di VS Code, cari bagian database, lalu ubah menjadi:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=dev_coffee
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Password dikosongkan karena itu bawaan Laragon. Kalau MySQL-mu pakai password, isi di `DB_PASSWORD`.
+Nama database di `.env` harus sama dengan database yang dibuat di Langkah 6.
+
+### Langkah 8: Buat tabel dan isi data awal
+
+```bash
+php artisan migrate --seed
+```
+
+Perintah ini membuat semua tabel dan mengisi: 3 role, 3 akun demo, 2 kategori, 15 menu Dev Coffee, dan 3 add-on.
+
+Link penyimpanan foto (dipakai fitur upload foto produk):
+
+```bash
+php artisan storage:link
+```
+
+### Langkah 9: Jalankan aplikasi
+
+```bash
+php artisan serve
+```
+
+Buka http://127.0.0.1:8000 di browser. Hentikan server dengan **Ctrl + C**.
+
+Setup selesai. Lanjut ke bagian akun demo untuk mencoba login.
+
+---
+
+## 4. Akun demo
+
+Dibuat otomatis oleh seeder. Hanya untuk pengembangan, jangan dipakai di produksi.
+
+| Role | Email | Password | Halaman setelah login |
+|---|---|---|---|
+| Admin | admin@devcoffee.test | password | /admin |
+| Kasir | kasir@devcoffee.test | password | /kasir |
+| Pelanggan | pelanggan@devcoffee.test | password | / (beranda) |
+
+---
+
+## 5. Alur kerja harian tim
+
+Kita memakai **branch per fitur**. Tidak ada yang mengedit atau push langsung ke `main`.
+
+### 5.1 Sebelum mulai bekerja (setiap hari)
+
+```bash
+git checkout main
+git pull
+```
+
+Ini mengambil versi terbaru dari GitHub. Lihat bagian 6 kalau ada perubahan database.
+
+### 5.2 Buat branch untuk fitur yang kamu kerjakan
+
+```bash
+git checkout -b feature/NAMA-FITUR
+```
+
+Ganti `NAMA-FITUR` dengan nama singkat tanpa spasi. Contoh:
+
+| Contoh nama branch | Dipakai untuk |
+|---|---|
+| `feature/produk` | CRUD produk dan foto |
+| `feature/katalog` | Katalog dan detail produk |
+| `feature/keranjang` | Keranjang dan add-on |
+| `feature/checkout` | Checkout pesanan |
+| `feature/panel-kasir` | Panel kasir |
+
+Satu branch untuk satu fitur. Jangan campur banyak fitur dalam satu branch.
+
+### 5.3 Coding, lalu simpan perubahan (commit)
+
+Lakukan sesering mungkin (setiap bagian kecil selesai), jangan menunggu sehari penuh:
+
+```bash
+git status
+git add .
+git commit -m "Tambah halaman daftar produk"
+```
+
+Tulis pesan commit yang jelas, misalnya `Tambah upload foto produk` atau `Perbaiki validasi harga`.
+Hindari pesan seperti `update` atau `fix`.
+
+### 5.4 Kirim ke GitHub (push)
+
+Push pertama dari branch baru:
+
+```bash
+git push -u origin feature/NAMA-FITUR
+```
+
+Push berikutnya di branch yang sama cukup:
+
+```bash
+git push
+```
+
+### 5.5 Buat Pull Request (PR)
+
+1. Buka repo di GitHub. Biasanya muncul tombol hijau **Compare & pull request**, lalu klik.
+   (Kalau tidak muncul, buka tab **Pull requests**, klik **New pull request**, base: `main`, compare: branch-mu.)
+2. Isi judul dan deskripsi singkat: apa yang ditambah, dan cara mengujinya.
+3. Klik **Create pull request**.
+4. Minta minimal **satu teman** meninjau (**Reviewers** di sisi kanan).
+5. Setelah disetujui dan tidak ada konflik, klik **Merge pull request**, lalu **Confirm merge**.
+
+### 5.6 Setelah PR di-merge
+
+```bash
+git checkout main
+git pull
+git branch -d feature/NAMA-FITUR
+```
+
+Lalu mulai fitur berikutnya dari langkah 5.1.
+
+---
+
+## 6. Mengambil update dari teman
+
+Setiap kali menjalankan `git pull` (atau sebelum mulai bekerja), lihat daftar file yang berubah di output git, lalu cek tabel ini:
+
+| Kalau ada perubahan di... | Jalankan |
+|---|---|
+| `composer.json` / `composer.lock` | `composer install` |
+| folder `database/migrations/` (migration baru) | `php artisan migrate` |
+| folder `database/seeders/` (data awal berubah) | `php artisan migrate:fresh --seed` |
+| `.env.example` (ada variabel baru) | Tambahkan variabel itu ke `.env` kamu |
+| Tampilan aneh atau perubahan tidak muncul | `php artisan optimize:clear` |
+
+> **Peringatan:** `php artisan migrate:fresh --seed` **menghapus semua tabel dan data** di database
+> lokalmu, lalu membuatnya ulang dari nol. Aman untuk data demo, tetapi data percobaan yang kamu buat
+> sendiri akan hilang.
+
+### Kalau kamu sedang di branch fitur dan `main` sudah berubah
+
+Ambil perubahan terbaru `main` ke branch-mu supaya tidak ketinggalan:
+
+```bash
+git checkout main
+git pull
+git checkout feature/NAMA-FITUR
+git merge main
+```
+
+Kalau muncul konflik, lihat bagian 8.
+
+---
+
+## 7. Aturan penting tim
+
+1. **Jangan push langsung ke `main`.** Selalu lewat branch dan Pull Request.
+2. **Jangan commit file `.env`.** Isinya konfigurasi pribadi. File ini sudah diabaikan lewat `.gitignore`.
+   Kalau menambah variabel `.env` baru, tulis juga contohnya di `.env.example`.
+3. **Jangan edit migration lama yang sudah di-merge.** Kalau struktur tabel perlu diubah, buat migration baru:
+   `php artisan make:migration nama_perubahan --table=nama_tabel`
+4. **Jangan memakai `git push --force`** ke `main` karena bisa menghapus pekerjaan orang lain.
+5. **Tabel baru wajib lewat migration.** Jangan membuat atau mengubah tabel manual di HeidiSQL atau phpMyAdmin,
+   karena perubahan itu tidak ikut ke teman.
+6. **Data awal yang perlu dibagikan** (misalnya menu baru) ditulis di seeder, bukan di database saja.
+7. **Bagi pekerjaan per modul** dan koordinasi lewat grup sebelum mengedit file bersama, seperti
+   `routes/web.php` dan `layouts/app.blade.php`. Dua orang mengedit baris yang sama = konflik.
+8. **Commit kecil dan sering**, lalu `git pull` sebelum mulai bekerja.
+9. Branch yang sudah di-merge dihapus supaya daftar branch tidak berantakan.
+
+---
+
+## 8. Menangani konflik
+
+Konflik muncul kalau dua orang mengubah bagian file yang sama. Git berhenti dan menandai file bermasalah.
+Ini hal biasa dan bisa diselesaikan:
+
+1. Jalankan `git status` untuk melihat file yang berkonflik (tertulis `both modified`).
+2. Buka file itu di VS Code. Bagian konflik ditandai seperti ini:
+
+```
+<<<<<<< HEAD
+kode versi kamu
+=======
+kode versi teman
+>>>>>>> main
+```
+
+3. VS Code menampilkan tombol di atas bagian itu: **Accept Current Change**, **Accept Incoming Change**,
+   **Accept Both Changes**. Pilih yang benar (sering kali **Accept Both**), lalu pastikan tanda `<<<<<<<`,
+   `=======`, `>>>>>>>` sudah hilang.
+4. Simpan file, lalu:
+
+```bash
+git add .
+git commit -m "Selesaikan konflik dengan main"
+git push
+```
+
+Kalau bingung, jangan asal pilih. Tanyakan ke teman yang mengubah bagian itu.
+
+---
+
+## 9. Masalah yang sering muncul
+
+| Pesan / gejala | Penyebab dan solusi |
+|---|---|
+| `Repository not found` saat clone | Undangan collaborator belum diterima, atau salah login GitHub |
+| `Authentication failed` / diminta password | Login lewat browser (Credential Manager). Atau pakai Personal Access Token (scope `repo`) sebagai password |
+| `composer install` gagal / PHP terlalu lama | Versi PHP kurang dari 8.2. Ganti versi PHP lewat Laragon (Menu, PHP, Version) |
+| `No application encryption key has been generated` | Jalankan `php artisan key:generate` |
+| `SQLSTATE[HY000] [1049] Unknown database` | Database `dev_coffee` belum dibuat (Langkah 6), atau namanya beda dengan `.env` |
+| `SQLSTATE[HY000] [1045] Access denied` | `DB_USERNAME` atau `DB_PASSWORD` di `.env` tidak cocok dengan MySQL-mu |
+| `SQLSTATE[HY000] [2002] Connection refused` | MySQL di Laragon belum menyala. Klik **Start All** |
+| `Base table or view already exists` | Jalankan `php artisan migrate:fresh --seed` |
+| Halaman `419 Page Expired` | Refresh halaman, atau jalankan `php artisan optimize:clear` |
+| Port 8000 sudah dipakai | `php artisan serve --port=8001` |
+| Tampilan tanpa CSS | Bootstrap dimuat dari internet. Cek koneksi, lalu refresh keras (Ctrl + Shift + R) |
+| Tabel baru dari teman tidak ada | Lupa `php artisan migrate` setelah `git pull` |
+| Perintah `git remote add origin` error `cannot find the file` | Tanda `<` dan `>` ikut diketik. Tulis URL tanpa tanda itu |
+| `failed to push some refs` | Ada update baru di GitHub. Jalankan `git pull`, lalu `git push` lagi |
+| `Your local changes would be overwritten` saat pull | Commit dulu perubahanmu (`git add .` dan `git commit`), lalu `git pull` lagi |
+
+---
+
+## 10. Struktur folder penting
+
+```
+dev-coffee/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/        # Logika halaman (AuthController, Admin/...)
+│   │   └── Middleware/         # RoleMiddleware (pembatasan akses per role)
+│   └── Models/                 # Model Eloquent (User, Product, Order, dst.)
+├── database/
+│   ├── migrations/             # Struktur tabel
+│   └── seeders/                # Data awal (role, akun demo, menu, add-on)
+├── resources/views/            # Tampilan Blade
+│   ├── layouts/app.blade.php   # Layout utama
+│   ├── auth/                   # Login dan registrasi
+│   ├── admin/                  # Halaman admin
+│   └── kasir/                  # Halaman kasir
+├── routes/web.php              # Daftar URL
+├── .env.example                # Contoh pengaturan (salin menjadi .env)
+└── README.md                   # Dokumen ini
+```
+
+## Role dan hak akses
+
+| Role | Hak akses |
+|---|---|
+| Pelanggan | Registrasi, lihat katalog, keranjang, checkout, lihat status dan riwayat pesanan |
+| Kasir | Lihat pesanan masuk, verifikasi pembayaran, ubah status, input pesanan walk-in |
+| Admin | Semua hak kasir, plus kelola pengguna, kategori, produk, harga, stok, dan laporan |
